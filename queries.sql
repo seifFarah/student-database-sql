@@ -27,7 +27,7 @@ CREATE TABLE EmploymentHistory (
 -- question five
 insert into EmploymentHistory(EmployeeId, EntryDate, EmploymentDuration)
 SELECT EmployeeId, CURRENT_TIMESTAMP, strftime('%Y', 'now') - strftime('%Y', HireDate)
-from Employee
+from Employee;
 
 -- question six
 select CAST(substr(InvoiceDate, 1,4) AS INT) as "Year", "$" || sum(Total) as "Sales Value"
