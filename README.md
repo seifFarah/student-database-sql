@@ -39,15 +39,15 @@ This project involves creating a SQL database for a media store and conducting v
 - Clone this repository:
   
   ```bash
-  git clone https://github.com/yourusername/media-store-sql.git
-  cd media-store-sql
+  git clone https://github.com/seifFarah/student-database-sql.git
+  cd student-database-sql
   ```
 
 ### Running the Project
 1. **Create the Database**
    
    ```sql
-   .read schema.sql
+   .read database.sql
    ```
 
 2. **Run Queries**
