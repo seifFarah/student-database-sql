@@ -1,129 +1,133 @@
-/* Question One 
+/*
 Hello! Hope this code works for you. Made by Seifeldin Farah.
 */
 
--- question two
+/* Retrieve employee details ordered by first name */
 SELECT EmployeeId as "Employee Id", LastName as "Last Name", FirstName as "First Name", Title, "ReportsTo" as "Reports To", BirthDate as "Birth Date", HireDate as "Hire Date", Address, City, State, Country, PostalCode as "Postal Code", Phone, Fax, Email
-from Employee
-ORDER by "First Name" asc;
+FROM Employee
+ORDER BY "First Name" ASC;
 
--- question three
-update Employee
-set Address = "42 Johnson Drive NW, Bentley, AB, Canada", PostalCode = "T5Y 5N2"
-where (LastName like "Callahan") AND (FirstName like "Laura");
+/* Update address and postal code for a specific employee */
+UPDATE Employee
+SET Address = "42 Johnson Drive NW, Bentley, AB, Canada", PostalCode = "T5Y 5N2"
+WHERE LastName = "Callahan" AND FirstName = "Laura";
 
--- question four
+/* Create a table to track employment history */
 CREATE TABLE EmploymentHistory (
   EmployeeID INTEGER NOT NULL,
-  EntryDate date NOT NULL,
+  EntryDate DATE NOT NULL,
   EmploymentDuration NUMERIC,
   PayRate INTEGER,
   PRIMARY KEY (EmployeeID, EntryDate),
   FOREIGN KEY (EmployeeID) REFERENCES Employee (EmployeeID)
 );
-	
--- question five
-insert into EmploymentHistory(EmployeeId, EntryDate, EmploymentDuration)
+
+/* Insert employment duration based on hire date */
+INSERT INTO EmploymentHistory(EmployeeId, EntryDate, EmploymentDuration)
 SELECT EmployeeId, CURRENT_TIMESTAMP, strftime('%Y', 'now') - strftime('%Y', HireDate)
-from Employee;
+FROM Employee;
 
--- question six
-select CAST(substr(InvoiceDate, 1,4) AS INT) as "Year", "$" || sum(Total) as "Sales Value"
-from Invoice
-GROUP by "Year" 
-ORDER BY "YEAR" ASC;
+/* Calculate total sales per year */
+SELECT CAST(substr(InvoiceDate, 1,4) AS INT) AS "Year", "$" || SUM(Total) AS "Sales Value"
+FROM Invoice
+GROUP BY "Year" 
+ORDER BY "Year" ASC;
 
--- question seven
-SELECT EmployeeId as "Employee ID", Case when CURRENT_DATE - HireDate >= 14 then "$75000" when(CURRENT_DATE - HireDate > 10 and CURRENT_DATE - HireDate < 14) then "$55000" else "$30000" end as "Payrate"
-from Employee;
+/* Determine pay rates based on years of employment */
+SELECT EmployeeId AS "Employee ID", 
+       CASE 
+           WHEN CURRENT_DATE - HireDate >= 14 THEN "$75000" 
+           WHEN CURRENT_DATE - HireDate > 10 AND CURRENT_DATE - HireDate < 14 THEN "$55000" 
+           ELSE "$30000" 
+       END AS "Payrate"
+FROM Employee;
 
--- question eight
-SELECT c.FirstName || " " || c.LastName AS "Full Names", c.Country as "Countries"
+/* Retrieve customers whose support rep was hired before the age of 35 */
+SELECT c.FirstName || " " || c.LastName AS "Full Names", c.Country AS "Countries"
 FROM Customer c
-inner join Employee e on c.SupportRepId = e.EmployeeId
+INNER JOIN Employee e ON c.SupportRepId = e.EmployeeId
 WHERE e.HireDate - e.BirthDate < 35;
 
--- question nine 
-SELECT c.country, COUNT(*) AS "Count of audio", SUM(t.UnitPrice) AS "Sum unit price"
-FROM invoiceLine il
-inner JOIN Track t ON t.TrackId = il.TrackId
-inner JOIN MediaType m ON m.MediaTypeId = t.MediaTypeId
-inner join invoice i on il.InvoiceId = i.InvoiceId
-inner join Customer c on c.CustomerId = i.CustomerId
-WHERE (NOT (m.MediaTypeId = 3)) and (c.Country like "%Germany%");
+/* Count audio purchases and total unit prices for customers from Germany, excluding MediaTypeId = 3 */
+SELECT c.Country, COUNT(*) AS "Count of audio", SUM(t.UnitPrice) AS "Sum unit price"
+FROM InvoiceLine il
+INNER JOIN Track t ON t.TrackId = il.TrackId
+INNER JOIN MediaType m ON m.MediaTypeId = t.MediaTypeId
+INNER JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+INNER JOIN Customer c ON c.CustomerId = i.CustomerId
+WHERE NOT (m.MediaTypeId = 3) AND c.Country LIKE "%Germany%";
 
--- question ten
-SELECT C.LastName || " " || C.FirstName AS "Customer", "$" || sum(I.Total) as "Sales Value", "%" || ((SUM(I.Total)/ (SELECT SUM(Total) FROM Invoice))* 100) as "% of Sales"
-from Customer C 
-left join Invoice I on C.CustomerId = I.CustomerId
-WHERE C.Company is null
-Group by "Customer"
-order by "Sales Value" desc
-limit 5;
+/* Find top 5 customers contributing the highest percentage of total sales */
+SELECT C.LastName || " " || C.FirstName AS "Customer", 
+       "$" || SUM(I.Total) AS "Sales Value", 
+       "%" || ((SUM(I.Total) / (SELECT SUM(Total) FROM Invoice)) * 100) AS "% of Sales"
+FROM Customer C 
+LEFT JOIN Invoice I ON C.CustomerId = I.CustomerId
+WHERE C.Company IS NULL
+GROUP BY "Customer"
+ORDER BY "Sales Value" DESC
+LIMIT 5;
 
+/* Retrieve albums with track count between 5 and 10 */
+SELECT a.Name AS "Artist Names", b.Title AS "Album Titles", COUNT(t.Name) AS "No. of Tracks"
+FROM Artist a
+INNER JOIN Album b ON a.ArtistId = b.ArtistId
+LEFT JOIN Track t ON t.AlbumId = b.AlbumId
+GROUP BY b.Title
+HAVING COUNT(b.AlbumID) BETWEEN 5 AND 10;
 
-
--- question eleven
-select a.name AS "Artist Names", b.Title as "Album Titles", Count(t.name) AS "No. of Tracks"
-from Artist a
-inner join Album b on a.ArtistId = b.ArtistId
-left JOIN track t on t.AlbumId = b.AlbumId
-group by b.Title
-HAVING Count(b.AlbumID) BETWEEN 5 AND 10;
- 
--- question twelve 
-SELECT t.TrackId as "Track ID", t.name AS "Track Name", g.name as "Genre Name"
+/* Find tracks from MediaTypeId = 3 that exceed the average duration for that media type */
+SELECT t.TrackId AS "Track ID", t.Name AS "Track Name", g.Name AS "Genre Name"
 FROM Track t
-left JOIN genre g ON g.GenreId = t.GenreId
+LEFT JOIN Genre g ON g.GenreId = t.GenreId
 WHERE t.MediaTypeId = 3
   AND t.Milliseconds > (SELECT AVG(Milliseconds) 
-  FROM track
-  where track.MediaTypeId = 3 );
+                        FROM Track
+                        WHERE MediaTypeId = 3);
 
-
--- question thirteen
-SELECT p.name as "Playlist Name", count(ar.name) as "No. of Tracks"
-from PlaylistTrack pt
-inner join Playlist p on pt.PlaylistId = p.PlaylistId
-inner join track t on t.TrackId = pt.TrackId
-inner join album a on t.AlbumId = a.AlbumId
-inner join artist ar on a.ArtistId = ar.ArtistId
-where ar.name like "AC/DC"
-GROUP by p.name
-order by "No. of tracks" ASC
+/* Identify the playlist with the fewest AC/DC tracks */
+SELECT p.Name AS "Playlist Name", COUNT(ar.Name) AS "No. of Tracks"
+FROM PlaylistTrack pt
+INNER JOIN Playlist p ON pt.PlaylistId = p.PlaylistId
+INNER JOIN Track t ON t.TrackId = pt.TrackId
+INNER JOIN Album a ON t.AlbumId = a.AlbumId
+INNER JOIN Artist ar ON a.ArtistId = ar.ArtistId
+WHERE ar.Name LIKE "AC/DC"
+GROUP BY p.Name
+ORDER BY "No. of Tracks" ASC
 LIMIT 1;
 
--- question fourteen
-SELECT m.firstName || ' ' || m.lastName AS "Manager",
-       reportsTo.firstName || ' ' || reportsTo.lastName AS "Reports to"
-FROM employee m
+/* Determine the manager overseeing the highest number of employees */
+SELECT m.FirstName || ' ' || m.LastName AS "Manager",
+       reportsTo.FirstName || ' ' || reportsTo.LastName AS "Reports to"
+FROM Employee m
 INNER JOIN (
     SELECT ReportsTo, COUNT(*) AS countmanaging
-    FROM employee
+    FROM Employee
     GROUP BY ReportsTo
-) AS subquery ON m.employeeID = subquery.ReportsTo
-INNER JOIN employee reportsTo ON m.ReportsTo = reportsTo.employeeID
-GROUP BY m.firstName, m.lastName
+) AS subquery ON m.EmployeeID = subquery.ReportsTo
+INNER JOIN Employee reportsTo ON m.ReportsTo = reportsTo.EmployeeID
+GROUP BY m.FirstName, m.LastName
 HAVING MAX(countmanaging) = (
     SELECT MAX(countmanaging)
     FROM (
         SELECT COUNT(*) AS countmanaging
-        FROM employee
+        FROM Employee
         GROUP BY ReportsTo
     ) AS subquery
 );
 
+/* Find playlists containing both "Cidade Negra" and "Ed Motta" as composers */
+SELECT DISTINCT pt.PlaylistId AS "Playlist Id", p.Name AS "Name"
+FROM PlaylistTrack pt
+LEFT JOIN Playlist p ON p.PlaylistId = pt.PlaylistId
+LEFT JOIN Track t ON t.TrackId = pt.TrackId
+WHERE (t.Composer LIKE "%Cidade Negra%") AND (t.Composer LIKE "%Ed Motta%");
 
--- question fifteen
-select DISTINCT pt.PlaylistId as "Playlist Id" as "Playlist Id", p.name as "Name"
-from PlaylistTrack pt
-LEFT join Playlist p on p.PlaylistId = pt.PlaylistId
-LEFT join Track t on t.TrackId = pt.TrackId
-where(t.composer like "%Cidade Negra%") AND (t.composer like "%Ed Motta%");
+/* Calculate total space and price for the "Grunge" playlist */
+SELECT p.Name, SUM(t.Bytes) AS "Total Space", "$" || SUM(t.UnitPrice) AS "Total Price"
+FROM PlaylistTrack pt
+LEFT JOIN Playlist p ON pt.PlaylistId = p.PlaylistId
+LEFT JOIN Track t ON t.TrackId = pt.TrackId
+WHERE p.Name LIKE "Grunge";
 
--- question sixteen
-select p.name, sum(t.Bytes) as "Total Space", "$" || sum(t.UnitPrice) as "Total Price"
-from PlaylistTrack pt
-left join Playlist p on pt.PlaylistId = p.PlaylistId
-left join track t on t.TrackId = pt.TrackId
-where p.name like "Grunge";
