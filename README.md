@@ -7,7 +7,7 @@ This project involves creating a SQL database for a media store and conducting v
 
 ## Project Structure
 - `database.sql`: Contains the SQL code to create the database schema.
-- `queries.sql`: Includes various SQL queries to analyze the data.
+- `queries.sql`: Includes various SQL queries to analyse the data.
 - `README.md`: Documentation explaining the project and how to use it.
 
 ## Features & Queries
