@@ -1,7 +1,5 @@
 /* Question One 
-Name: Seifeldin Farah
-AUID: 959650988
-NetID: sfar671
+Hello! Hope this code works for you. Made by Seifeldin Farah.
 */
 
 -- question two
